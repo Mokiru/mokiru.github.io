@@ -60,14 +60,60 @@ $$
 \begin{aligned}
 &Let\ h:D \rightarrow [0,1] \equiv \{0,1\}^{\infty} hash\ data\ from \ domain\ D\ to\ the\ binary\ domain.\\
 &Let\ \rho(s),for s\in \{0,1\}^{\infty},be\ the\ position\ of\ the\ leftmost\ 1-bit\ (\rho(0001...)=4).\\
-&Algorithm\ HyperLogLog\ (input M:multiset of items from domain D).\\
-&assume m=2^b with b\in Z\gt 0;\\
+&Algorithm\ HyperLogLog\ (input M:multiset \ of \ items\ from\ domain\ D).\\
+&assume\ m=2^b\ with\ b\in Z\gt 0;\\
 &initialize\ a\ collection\ of\ m\ reisters,M[1],...,M[m],to\ -\infty;\\
 &for\ v\in M\ do:\\
 & \ \ \ \ \ \ set\ x:= h(v);\\
-& \ \ \ \ \ \ set\ j=1+\langle x_1x_2...x_b \rangle _{2}; \set{the binary address determined by the first b bits of x}\\
+& \ \ \ \ \ \ set\ j=1+\langle x_1x_2...x_b \rangle _{2}; \set{the\ binary\ address\ determined\ by\ the\ first\ b\ bits\ of\ x}\\
 & \ \ \ \ \ \ set\ \omega := x_{b+1}x_{b+2}...; set\ M[j] := max(M[j], \rho(\omega));\\
-&compute\ Z:=(\sum_{j=1}^{m}2^{-M[j]});\set{the "indicator" function}\\
+&compute\ Z:=(\sum_{j=1}^{m}2^{-M[j]});\set{the\ “indicator”\ function}\\
 &return\ E:=\alpha_{m}m^2Z\
+\end{aligned}
+$$
+
+输入一个多重集 $$M$$(即顺序读取数据流)，输出为 $$M$$ 中不同元素的数量，给定一个字符串 $$ S\in \set{0,1}^{\infty}$$，令 $$\rho(s)$$ 代表最左边的 $$1$$ 的位置，将流 $$M$$ 分为子流 $$M_1,...,M_m$$，基于哈希值的前 $$b$$位计算，其中 $$m=2^b$$ ，每个子流独立处理，对于 $$ N\equiv M_j$$ 这样的子流(被视为由去掉了初始 $$b$$ 位的哈希值组成)，相应的观测值为:
+
+$$
+Max(N):=\max_{x\in N}\rho(x)
+$$
+
+通常 $$Max(\emptyset)=-\infty$$。$$M(j)=Max(M_j)$$ ，当所有的元素都被遍历完，这个算法的指标为：
+
+$$
+Z:=(\sum_{j=1}^{m}2^{-M[j]})
+$$
+
+然后，会以下面的形式返回 $$2^{M(j)}$$ 的调和平均值
+
+$$
+E:=\alpha_{m}m^2Z,with \ \alpha:=(m\int_{0}^{\infty}(log_{2}(\frac{2+u}{1+u}))^{m}du)^{-1}.
+$$
+
+## Discussion
+
+$$
+\begin{aligned}
+&Let\ h\ :\ D\rightarrow\set{0,1}^{32}\ hash\ data\ from\ D\ to\ binary\ 32-bit\ words.\\
+&Let\ \rho(s)\ be\ the\ position\ of\ the\ leftmost\ 1-bit\ of\ s\ :\ e.g.\ \rho(1...)=1,\rho(0001...)=4,\rho(0^{K})=K+1.\\
+&define\ \alpha_{16}=0.673;\ \alpha_{32}=0.697;\ \alpha_{64}=0.709;\ \alpha_{m}=0.7213/(1+1.079/m)\ for\ m\geq 128;\\
+&Program\ HYPERLOGLOG\ (input\ M:multiset\ of\ items\ from\ domain\ D).\\
+&initialize\ a\ collection\ of\ m\ registers,\ M[1],...,M[m],to\ 0;\\
+\\
+&for\ v\in M\ do\\
+&\ \ \ \ set\ x:= \ h(v);\\
+&\ \ \ \ set\ j=1+(x_{1}x_{2}...x_{b})_{2}; \ \ \ \ \set{the\ binary\ address\ determined\ by\ the\ first\ b\ bits\ of\ x}\\
+&\ \ \ \ set\ \omega:=x_{b+1}x_{b+2}...;\\
+&\ \ \ \ set\ M[j]:=\max(M[j],\rho(\omega));\\
+&compute\ E:=\alpha_{m}m^{2}\sdot(\sum_{j=1}^{m}2^{-M[j]})^{-1};\ \ \ \ \set{the\ “row”\ HyperLogLog\ estimate}
+\\
+&if\ E\leq \frac{5}{2}m\ then\\
+&\ \ \ \ let\ V\ be\ the\ number\ of\ registers\ equal\ to\ 0;\\
+&\ \ \ \ if\ V\neq 0\ then\ set\ E^{*}:=mlog(m/V)\ else\ set\ E^{*}:=E;\ \ \ \ \set{small\ range\ correction}\\
+&if\ E\leq\frac{1}{30}2^{32}\ then\\
+&\ \ \ \ set\ E^{*}:=E;\ \ \ \ \set{intermediate\ range-no\ correction}\\
+&if\ E\gt\frac{1}{30}2^{32}\ then\\
+&\ \ \ \ set\ E^{*}:=-2^{32}log(1-E/2^{32});\ \ \ \ \set{large\ range\ correction}\\
+&return\ candinality\ estimate\ E^{*}\ with\ typical\ relative\ error\pm 1.04/\sqrt{m}.
 \end{aligned}
 $$
