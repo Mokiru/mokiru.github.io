@@ -1,11 +1,11 @@
 ---
-title: HyperLogLog-快速统计不同元素数量(有误差)
+title: HyperLogLog-估计流中元素数量(去重)
 date: 2025-04-09 21:30:00 +0800
 categories: [Java, Math]
 tags: [study]     # TAG names should always be lowercase
 author: momochi
 # authors: [xx,xx]
-description: 初识HyperLogLog
+description: HyperLogLog介绍
 comments: true # 评论
 pin: false # top 
 math: true
