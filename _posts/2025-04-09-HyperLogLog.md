@@ -1,7 +1,7 @@
 ---
 title: HyperLogLog-估计流中元素数量(去重)
 date: 2025-04-09 21:30:00 +0800
-categories: [Java, Math]
+categories: [Math]
 tags: [study]     # TAG names should always be lowercase
 author: momochi
 # authors: [xx,xx]
