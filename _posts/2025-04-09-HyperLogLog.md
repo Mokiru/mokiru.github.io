@@ -117,3 +117,92 @@ $$
 &return\ candinality\ estimate\ E^{*}\ with\ typical\ relative\ error\pm 1.04/\sqrt{m}.
 \end{aligned}
 $$
+
+
+以下是一个`HyperLogLog`的`Java`实现
+
+```java
+import java.util.Arrays;
+
+public class HyperLogLog {
+    private final int[] registers;
+    private final int m;
+    private final double alphaMM;
+
+    public HyperLogLog(int b) {
+        if (b < 4 || b > 16) {
+            throw new IllegalArgumentException("b must be in the range [4, 16]");
+        }
+        this.m = 1 << b; // m = 2^b
+        this.registers = new int[m];
+        Arrays.fill(registers, 0);
+        this.alphaMM = getAlphaMM(m);
+    }
+
+    private double getAlphaMM(int m) {
+        switch (m) {
+            case 16:
+                return 0.673 * m * m;
+            case 32:
+                return 0.697 * m * m;
+            case 64:
+                return 0.709 * m * m;
+            default:
+                return (0.7213 / (1 + 1.079 / m)) * m * m;
+        }
+    }
+
+    private int rho(long value, int maxBits) {
+        int position = 1;
+        while ((value & 1) == 0 && position <= maxBits) {
+            value >>>= 1;
+            position++;
+        }
+        return position;
+    }
+
+    public void add(long hash) {
+        int index = (int) (hash >>> (Long.SIZE - Integer.numberOfTrailingZeros(m)));
+        long w = hash & ((1L << (Long.SIZE - Integer.numberOfTrailingZeros(m))) - 1);
+        registers[index] = Math.max(registers[index], rho(w, Long.SIZE - Integer.numberOfTrailingZeros(m)));
+    }
+
+    public double estimate() {
+        double z = 0.0;
+        int zeroCount = 0;
+
+        for (int register : registers) {
+            z += 1.0 / (1 << register);
+            if (register == 0) {
+                zeroCount++;
+            }
+        }
+
+        double estimate = alphaMM / z;
+
+        if (estimate <= 2.5 * m) {
+            // Small range correction
+            return zeroCount > 0 ? m * Math.log((double) m / zeroCount) : estimate;
+        } else if (estimate > (1.0 / 30.0) * (1L << 32)) {
+            // Large range correction
+            return -(1L << 32) * Math.log(1 - (estimate / (1L << 32)));
+        } else {
+            // No correction
+            return estimate;
+        }
+    }
+
+    public static void main(String[] args) {
+        HyperLogLog hll = new HyperLogLog(10); // b = 10, m = 2^10 = 1024
+        for (int i = 1; i <= 1000000; i++) {
+            hll.add(hash(i));
+        }
+        System.out.println("Estimated cardinality: " + hll.estimate());
+    }
+
+    private static long hash(int value) {
+        // A simple hash function (can be replaced with a better one)
+        return value * 0x9E3779B97F4A7C15L;
+    }
+}
+```
