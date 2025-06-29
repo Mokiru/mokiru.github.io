@@ -91,6 +91,49 @@ target[mask == 0] = [0, 0, 0]
 
 通过读取背景灰度图，分析其像素亮度分布，最终提取出“较暗”区域，然后将这些区域设置为白色，其他区域设置为黑色。
 
+该方法最关键的步骤是找到合适的阈值来区分“较暗”和“较亮”区域。
 
+这里经过多次实践，发现缺口部分的颜色(RGB)波动较大，很难找到一个合适的固定阈值来区分缺口和背景。因此这里使用动态阈值的方法，OTSU适合图像直方图有两个峰的情况：
 
+```python
+cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+```
 
+接着只需要利用这个`mask`将255对应原图片的位置设置为白色，其余设置为黑色。
+
+上述裁剪过后的背景图，经过该处理后的效果图如下：
+
+![alt text](/assets/img/slider_captcha/res_background.png)
+
+可以直接找出与处理后的拼图较匹配的位置，最终我们使用模板匹配方法，在背景图中找到与拼图最佳位置：
+
+```python
+res = cv2.matchTemplate(background, target, cv2.TM_CCOEFF_NORMED)
+# 找到最佳匹配位置 其中max_loc是匹配度最高的位置
+min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+```
+
+如此，找到了最佳位置，这里将匹配位置绘制在裁剪后的背景图中：
+
+![alt text](/assets/img/slider_captcha/res.png)
+
+该方法的提升空间在于阈值化步骤，只要阈值确定的好，就能较好的区分出缺口和背景，如此再使用模板匹配时就能更好的找到正确位置。
+
+### 边缘检测
+
+通过边缘检测，我们希望该方法能够较好的通过缺口和其余部分的颜色梯度变化识别出缺口位置。最终找位置都是使用模板匹配的方式。
+
+这里，我们依旧使用上面图像预处理后的拼图(未二值化)和背景。直接使用`cv2.Canny`看一下边缘检测后的图片效果：
+
+```python
+background = cv2.Canny(background, 100, 200)
+cv2.imwrite("test/88_/background_canny.png", background)
+```
+
+最终输出的拼图和背景如下：
+
+![alt text](/assets/img/slider_captcha/target_canny.png)
+
+![alt text](/assets/img/slider_captcha/background_canny.png)
+
+可以发现效果并不好，因为拼图是不规则图片，而图片都是矩形的方式，对拼图进行边缘检测容易受到非拼图区域的影响。
