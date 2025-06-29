@@ -137,3 +137,9 @@ cv2.imwrite("test/88_/background_canny.png", background)
 ![alt text](/assets/img/slider_captcha/background_canny.png)
 
 可以发现效果并不好，因为拼图是不规则图片，而图片都是矩形的方式，对拼图进行边缘检测容易受到非拼图区域的影响。
+
+我们先忽略边缘检测方法中两个参数的影响，先处理拼图图片中非拼图区域对检测结果的影响，我们需要先对拼图进行边缘检测，因为其色彩差异很大，能够很好的区分出拼图和非拼图。然后我们需要在最终的输出结果中，去掉这个边缘。
+
+```python
+
+```
