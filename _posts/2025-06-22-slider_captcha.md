@@ -9,6 +9,7 @@ description: 介绍简单的滑块验证码如何通过OpenCV解决的思路，�
 comments: true # 评论
 pin: false # top 
 math: true
+layout: null
 ---
 
 ## 目标
