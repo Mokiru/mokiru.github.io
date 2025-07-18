@@ -17,14 +17,14 @@ content: true
 
 该篇使用Chromium版本为140.0.7300.1，注意在下载过程中需要在命令行中设置代理，假设某vpn代理端口为5555。那么应在命令行中输入如下设置：
 
-```shell
+```bash
 set http_proxy=http://127.0.0.1:5555
 set https_proxy=http://127.0.0.1:5555
 ```
 
 ## git 下载
 
-```shell
+```bash
 git version
 ```
 
@@ -32,7 +32,7 @@ git version
 
 然后在命令行中进行如下设置，其中名称等自定义填写：
 
-```shell
+```bash
 git config --global user.name "My Name"
 git config --global user.email "my-name@chromium.org"
 git config --global core.autocrlf false
@@ -49,7 +49,7 @@ git config --global core.longpaths true
 
 几乎整个流程需要使用`vpn`
 
-```shell
+```bash
 cd /d D:\src
 git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 ```
@@ -80,13 +80,13 @@ git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
 例如：
 
-```shell
+```bash
 mkdir chromium && cd chromium
 ```
 
 然后使用`fetch`拉取源码，可以使用`--no-history`只拉取最新版本。
 
-```shell
+```bash
 fetch --no-history chromium
 ```
 
@@ -94,7 +94,7 @@ fetch --no-history chromium
 
 如果中途出现错误，或其他原因导致的中断下载，可以进入当前目录的`src`文件夹，然后打开命令行输入：
 
-```shell
+```bash
 gclient sync
 ```
 
@@ -104,7 +104,7 @@ gclient sync
 
 先要配置并生成Ninja构建文件，以下为最小构建：
 
-```shell
+```bash
 gn gen out\Default --args="is_component_build = true is_debug = false enable_nacl = false  blink_symbol_level = 0 v8_symbol_level = 0 symbol_level = 0"
 ```
 
@@ -116,18 +116,18 @@ gn gen out\Default --args="is_component_build = true is_debug = false enable_nac
 
 然后使用Ninja编译Chromium，生成可执行的浏览器chrome.exe
 
-```shell
+```bash
 autoninja -C out\Default chrome
 ```
 
 或者设置最大并行任务数来限制编译过程中开启的并行任务数量，防止因为内存不足导致的编译中断。以下为开启并行任务数为4的示例：
 
-```shell
+```bash
 autoninja -C out\Default chrome -j4
 ```
 
 ## 生成安装包
 
-```shell
-$ autoninja -C out\Default mini_installer
+```bash
+autoninja -C out\Default mini_installer
 ```
