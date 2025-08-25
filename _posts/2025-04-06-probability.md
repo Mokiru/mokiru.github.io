@@ -1,7 +1,7 @@
 ---
 title: Probability Theory
 date: 2025-04-06 05:00:00 +0800
-categories: [Math]
+categories: [Math, 线性代数]
 tags: [study]     # TAG names should always be lowercase
 author: momochi
 # authors: [xx,xx]
