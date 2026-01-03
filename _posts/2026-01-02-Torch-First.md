@@ -1,7 +1,7 @@
 ---
 title: PyTorch使用
 date: 2025-06-22 22:00:00 +0800
-categories: [AI, Base]
+categories: [ML, Base]
 tags: [implement]     # TAG names should always be lowercase
 author: momochi
 # authors: [xx,xx]
